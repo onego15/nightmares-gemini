@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LE THÉÂTRE DES OMBRES — 影の劇場からの脱出</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Cinematic Vignette & Film Grain Overlay -->
+    <div id="film-overlay"></div>
+    <div id="danger-vignette"></div>
+
+    <!-- Letterbox Bars for Cutscenes & Dramatic Camera Framing -->
+    <div id="letterbox-top" class="letterbox"></div>
+    <div id="letterbox-bottom" class="letterbox"></div>
+
+    <!-- Diegetic / World-Space Floating Prompt -->
+    <div id="world-prompt" class="hidden">
+      <div class="prompt-key" id="prompt-key-text">E</div>
+      <div class="prompt-label" id="prompt-label-text">調べる</div>
+    </div>
+
+    <!-- Subtle Chapter / Scene Title Notification -->
+    <div id="chapter-banner" class="hidden">
+      <div class="chapter-subtitle" id="chapter-sub">ACT I</div>
+      <div class="chapter-title" id="chapter-main">塵と天鵞絨の奈落</div>
+      <div class="chapter-divider"></div>
+    </div>
+
+    <!-- Subtle Narrative Monologue / Environmental Whisper -->
+    <div id="subtitle-box" class="hidden">
+      <p id="subtitle-text"></p>
+    </div>
+
+    <!-- Top-Right Minimalist HUD (Chapter & Camera Lens Indicator + Controls toggle) -->
+    <div id="top-hud" class="hidden">
+      <div id="camera-mode-indicator">
+        <span class="rec-dot"></span>
+        <span id="cam-lens-label">35mm — 追従</span>
+      </div>
+      <div id="key-inventory"></div>
+      <button id="btn-help" title="操作ガイド (H)">?</button>
+    </div>
+
+    <!-- Controls Hint Overlay (Bottom Left, fades out naturally) -->
+    <div id="controls-bar" class="hidden">
+      <span><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd> 移動</span>
+      <span><kbd>Shift</kbd> 走る</span>
+      <span><kbd>Space</kbd> 跳ぶ・登る</span>
+      <span><kbd>C</kbd> / <kbd>↓</kbd> しゃがむ（隠れる）</span>
+      <span><kbd>E</kbd> 掴む・操作</span>
+    </div>
+
+    <!-- Title Screen Overlay -->
+    <div id="title-screen">
+      <div class="curtain-bg"></div>
+      <div class="title-content">
+        <p class="pre-title">A 2.5D CINEMATIC ESCAPE EXPERIENCE</p>
+        <h1 class="main-title">LE THÉÂTRE DES OMBRES</h1>
+        <h2 class="jp-title">— 影の劇場と操り人形の終幕 —</h2>
+        <div class="title-ornament">✦ ─── ✦ ─── ✦</div>
+        <p class="story-intro">
+          閉鎖された古い歌劇場「グラン・ギニョール」。<br>
+          赤い天鵞絨の幕の奥、スポットライトの光を喰らう「支配人」の影が彷徨っている。<br>
+          舞台装置と照明を操り、終わらない公演から脱出せよ。
+        </p>
+        <div class="title-actions">
+          <button id="btn-start-game" class="primary-btn">幕を開ける (START)</button>
+        </div>
+        <div class="chapter-select-row">
+          <span class="chapter-select-label">場面選択 (Scene Preview):</span>
+          <button class="scene-btn" data-act="1">Act I: 奈落の底</button>
+          <button class="scene-btn" data-act="2">Act II: 忘却の舞台</button>
+          <button class="scene-btn" data-act="3">Act III: 照明桟橋の追跡</button>
+          <button class="scene-btn" data-act="4">Act IV: 終幕のシャンデリア</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pause / Help Modal -->
+    <div id="help-modal" class="hidden">
+      <div class="modal-card">
+        <h3>上演案内（操作方法・ヒント）</h3>
+        <ul class="help-list">
+          <li><strong>移動:</strong> <kbd>A</kbd> / <kbd>D</kbd> または <kbd>←</kbd> / <kbd>→</kbd> （<kbd>Shift</kbd> でダッシュ）</li>
+          <li><strong>ジャンプ・よじ登り:</strong> <kbd>Space</kbd> または <kbd>W</kbd> / <kbd>↑</kbd> （段差の端で押すとよじ登ります）</li>
+          <li><strong>しゃがむ・隠れる:</strong> <kbd>C</kbd> または <kbd>S</kbd> / <kbd>↓</kbd> （低い隙間を潜る・天鵞絨の幕の影に隠れる）</li>
+          <li><strong>掴む・レバー操作:</strong> <kbd>E</kbd> キー（木箱を押す/引く時は <kbd>E</kbd> を押し続けながら左右移動、または近くで移動）</li>
+          <li><strong>舞台の掟:</strong> 赤い監視スポットライトに照らされると「支配人」が襲来します。物陰や幕の後ろでやり過ごしましょう。</li>
+        </ul>
+        <div class="modal-actions">
+          <button id="btn-resume" class="primary-btn">舞台へ戻る</button>
+          <button id="btn-restart-checkpoint" class="secondary-btn">直前の場面からやり直す</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Death / Caught Overlay -->
+    <div id="caught-overlay" class="hidden">
+      <div class="caught-text">糸に繋がれてしまった……</div>
+    </div>
+
+    <!-- Ending Screen -->
+    <div id="ending-screen" class="hidden">
+      <div class="ending-content">
+        <p class="ending-pre">FIN</p>
+        <h1 class="ending-title">夜明けのカーテンコール</h1>
+        <div class="title-ornament">✦ ─── ✦ ─── ✦</div>
+        <p class="ending-desc">
+          大シャンデリアが崩れ落ち、支配人の糸は断ち切られた。<br>
+          砕け散った正面扉の向こうには、静かな夜明けの街並みが広がっている。<br>
+          あなたはもう、誰にも操られない。
+        </p>
+        <div class="ending-stats" id="ending-stats"></div>
+        <button id="btn-play-again" class="primary-btn">もう一度最初から演じる</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

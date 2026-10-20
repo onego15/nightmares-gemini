@@ -1,0 +1,18 @@
+{
+  "name": "curtain-call-of-the-marionette",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "playwright": "^1.49.0"
+  }
+}
